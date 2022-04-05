@@ -20,7 +20,7 @@ public class RedisCacheAspect<K, V> {
     @Autowired
     RedissonClient redissonClient;
 
-    @Around("@annotation(redisCache) && execution(java.util.Map *(java.util.Collection))")
+    @Around("@annotation(redisCache) && execution(java.util.Map *(java.util.List))")
     public Object redisCache(ProceedingJoinPoint joinPoint, RedisCache redisCache) throws Throwable {
         Map<K, V> resultMap = new HashMap<>();
 
@@ -58,6 +58,11 @@ public class RedisCacheAspect<K, V> {
         } catch (Throwable e) {
             log.error("获取redis缓存{}失败，直接从panshi接口获取", redisCache.name(), e);
             resultMap = (Map<K, V>) joinPoint.proceed();
+        }
+        if (resultMap.size() > 0) {
+            log.info("get data from redis");
+        } else {
+            log.info("no data from redis");
         }
         return resultMap;
     }
